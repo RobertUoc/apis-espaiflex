@@ -27,7 +27,7 @@ class Reserva extends Model
         'el_semana',
         'el_dia',        
         'import',
-        'actiu'.
+        'actiu',
         'id_user',
         'data_creacio',
         'data_update',
@@ -56,11 +56,12 @@ class Reserva extends Model
 
     public function comentaris()
     {
-        return $this->belongsToMany(
-            Comentari::class,
-            '_t_reserves_comentaris',
-            'id_reserves',            
-        );
+//        return $this->belongsToMany(
+//            Comentari::class,
+//            '_t_reserves_comentaris',
+//            'id_reserves'            
+//        );
+
     }
 
 }

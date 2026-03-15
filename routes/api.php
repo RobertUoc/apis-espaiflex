@@ -40,15 +40,21 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
 });
 
 // Sense Token
+// Login Part administrativa
 Route::post('/login', [AuthController::class, 'login']);
+// Llegir Edificis 
 Route::get('/edificis', [EdificiController::class, 'index']);
-Route::post('/reserves', [ReservaController::class, 'store']);
+// Crear Usuaris Plataforma
 Route::post('/users', [UserController::class, 'store']); 
-
+// Calendari
+// llegir tot el calendari
 Route::get('/reserves/any/{any}/edifici/{edifici}', [ReservaController::class, 'lecturaReserves']);
+// Veure estats d'un dia
 Route::get('/reserves/dia/{dia}/edifici/{edifici}', [ReservaController::class, 'lecturaDia']);
-Route::get('/reserves/dia/{dia}/sala/{sala}', [ReservaController::class, 'lecturaEvent']);
+
+// Veure reserva per id
 Route::get('/reserves/reserva/{id}', [ReservaController::class, 'lecturaReserva']);
+
 Route::get('/reserves/dia/{dia}/sala/{sala}/reserva/{reserva}', [ReservaController::class, 'miraReserva']);
 
 Route::post('/comentaris', [ComentariController::class, 'store']);
@@ -64,6 +70,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/reserves/delete_event/{id_event}', [ReservaController::class, 'deleteEvent']);    
     // Genero Factura
     Route::put('/reserves/factura', [FacturaController::class, 'store']);    
+
+    // Crear sheuleder para pedir reserva
+    Route::get('/reserves/dia/{dia}/sala/{sala}', [ReservaController::class, 'lecturaEvent']);
+    // Buscar conflicte
+    Route::get('/reserves/buscarSala/sala/{sala}/diainici/{diainici}/diafi/{diafi}/horainici/{horainici}/horafi/{horafi}', [ReservaController::class, 'buscarConflicte']);
+    // Insert Dia
+    Route::post('/reserves', [ReservaController::class, 'store']);
+
 });
 
 

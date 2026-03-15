@@ -19,7 +19,7 @@ return new class extends Migration
                 $table->date('dia_fi')->nullable();
                 $table->time('hora_inici')->nullable();
                 $table->time('hora_fi')->nullable();
-                $table->integer('frequencia')->nullable();
+                $table->string('frequencia',10);
                 $table->integer('dilluns')->default(0);
                 $table->integer('dimarts')->default(0);
                 $table->integer('dimecres')->default(0);
@@ -42,10 +42,8 @@ return new class extends Migration
                 /* INDICES */
                 $table->index(['sala','dia_inici','dia_fi','hora_inici','hora_fi'], 'idx_reserva_sala_dia');
                 $table->index('id_user', 'idx_reserva_user');
-
                 
             });       
-
 
             /*  TRIGGER   */
 
@@ -56,19 +54,27 @@ return new class extends Migration
             BEGIN
                 SET NEW.data_creacio = NOW();
                 SET NEW.data_update = NOW();
+            END
+            ');
 
-                INSERT INTO _t_reserves_audit
-                (id_reserva, sala, dia_inici, dia_fi, hora_inici, hora_fi, frequencia,
-                dilluns, dimarts, dimecres, dijous, divendres, dissabte, diumenge,
-                dia_mes, tipo, el_semana, el_dia, import, actiu, id_user,
-                data_creacio, data_update, data_delete, tipo_audit, data_creacio_audit)
+            DB::unprepared('
+            CREATE TRIGGER _t_reserves_AFTER_INSERT
+            AFTER INSERT ON _t_reserves
+            FOR EACH ROW
+            BEGIN
 
-                VALUES
-                (NEW.id, NEW.sala, NEW.dia_inici, NEW.dia_fi, NEW.hora_inici, NEW.hora_fi,
-                NEW.frequencia, NEW.dilluns, NEW.dimarts, NEW.dimecres, NEW.dijous,
-                NEW.divendres, NEW.dissabte, NEW.diumenge, NEW.dia_mes, NEW.tipo,
-                NEW.el_semana, NEW.el_dia, NEW.import, NEW.actiu, NEW.id_user,
-                NEW.data_creacio, NEW.data_update, NEW.data_delete, "INSERT", NOW());
+            INSERT INTO _t_reserves_audit
+            (
+            id_reserva, sala, dia_inici, dia_fi, hora_inici, hora_fi, frequencia, dilluns, dimarts, dimecres, dijous, divendres, dissabte, diumenge,
+            dia_mes, tipo, el_semana, el_dia, import, actiu, id_user, data_creacio, data_update, data_delete, tipo_audit, data_creacio_audit
+            )
+            VALUES
+            (
+            NEW.id, NEW.sala, NEW.dia_inici, NEW.dia_fi, NEW.hora_inici, NEW.hora_fi, NEW.frequencia, NEW.dilluns,
+            NEW.dimarts, NEW.dimecres, NEW.dijous, NEW.divendres, NEW.dissabte, NEW.diumenge, NEW.dia_mes, NEW.tipo,
+            NEW.el_semana, NEW.el_dia, NEW.import, NEW.actiu, NEW.id_user, NEW.data_creacio, NEW.data_update, NEW.data_delete, "INSERT", NOW()
+            );
+
             END
             ');
 

@@ -22,25 +22,13 @@ return new class extends Migration
             $table->index('id_reserves', 'idx_reserva_complement_reserva');
             $table->index('id_complements', 'idx_reserva_complement_complement');
 
-            /*
-            Relaciones
-            */
-            $table->foreign('id_reserves')
-                ->references('id')
-                ->on('_t_reserves')
-                ->cascadeOnDelete();
-            $table->foreign('id_complements')
-                ->references('id')
-                ->on('_t_complements')
-                ->cascadeOnDelete();
-
         });
 
         /* TRIGGER */
 
         DB::unprepared('
         CREATE TRIGGER _t_reserves_in_complements_BEFORE_INSERT
-        BEFORE INSERT ON _t_reserves_in_complements
+        AFTER INSERT ON _t_reserves_in_complements
         FOR EACH ROW
         BEGIN
             INSERT INTO _t_reserves_in_complements_audit

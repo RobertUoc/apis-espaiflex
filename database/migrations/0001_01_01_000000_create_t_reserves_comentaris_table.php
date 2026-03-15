@@ -24,17 +24,6 @@ return new class extends Migration
             $table->index('id_reserves', 'idx_comentari_reserva');
             $table->index(['id_reserves','created_at'], 'idx_comentari_reserva_data');            
             
-            /*
-            Relaciones (opcional pero recomendable)
-            */
-            $table->foreign('id_reserves')
-                ->references('id')
-                ->on('_t_reserves')
-                ->cascadeOnDelete();
-            $table->foreign('id_user')
-                ->references('id')
-                ->on('users')
-                ->nullOnDelete();
         });
     }
 

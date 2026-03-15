@@ -19,7 +19,7 @@ return new class extends Migration
             $table->date('dia_fi')->nullable();
             $table->time('hora_inici')->nullable();
             $table->time('hora_fi')->nullable();
-            $table->integer('frequencia')->nullable();
+            $table->string('frequencia',10);
             $table->integer('dilluns')->nullable();
             $table->integer('dimarts')->nullable();
             $table->integer('dimecres')->nullable();
