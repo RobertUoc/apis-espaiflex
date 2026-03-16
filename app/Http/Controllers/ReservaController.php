@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Reserva;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Mail\FacturaMail;
+use App\Http\Controllers\FacturaController;
 
 class ReservaController extends Controller
 {
@@ -12,22 +14,28 @@ class ReservaController extends Controller
     // Paso Any i Edidifi
     public function lecturaReserves($any, $edifici)
     {
-       $reserves = DB::table('_t_reserves as res')
+       $reserves = DB::table('_t_reserves_dies as dia')
+        ->leftJoin('_t_reserves as res', 'res.id', '=', 'dia.id_reserva')
         ->leftJoin('_t_sales as sal', 'res.sala', '=', 'sal.id')
         ->select(
             'res.id',
-            'res.dia_inici',
-            'res.dia_fi',
-            'res.hora_inici',
-            'res.hora_fi',
+            'dia.id_reserva',
+            'dia.dia_inici',
+            'dia.dia_fi',
+            'dia.hora_inici',
+            'dia.hora_fi',
             'sal.color',
             'sal.descripcio',
-            'res.sala'
+            'res.sala',
+            DB::raw("CONCAT(dia.dia_inici,'T',dia.hora_inici) as start"),
+            DB::raw("CONCAT(dia.dia_fi,'T',dia.hora_fi) as end")
         )
-        ->where('res.actiu', 'SI')
-        ->whereNull('res.data_delete')
-        ->whereYear('res.dia_inici', $any)
+        ->where('dia.actiu', 'SI')
+        ->whereNull('dia.data_delete')
+        ->whereYear('dia.dia_inici', $any)
         ->where('sal.id_edifici', $edifici)
+        ->orderBy('dia.dia_inici')
+        ->orderBy('dia.hora_inici')
         ->get();
         return response()->json($reserves);
     }
@@ -192,17 +200,62 @@ class ReservaController extends Controller
     // Esborrar un event    
     public function deleteEvent($id) 
     {
-        $ok = DB::table('_t_reserves')
-                ->where('id', $id)
-                ->update([
-                    'data_delete' => now(),
-                    'actiu' => 'NO'
+        return DB::transaction(function () use ($id) {
+
+                // Obtener reserva
+                $reserva = DB::table('_t_reserves')
+                    ->where('id', $id)
+                    ->first();
+
+                if (!$reserva) {
+                    return response()->json(['error' => 'Reserva no encontrada'], 404);
+                }
+
+                // Cancelar reserva
+                DB::table('_t_reserves')
+                    ->where('id', $id)
+                    ->update([
+                        'data_delete' => now(),
+                        'actiu' => 'NO'
+                    ]);
+
+                // Cancelar días asociados
+                DB::table('_t_reserves_dies')
+                    ->where('id_reserva', $id)
+                    ->update([
+                        'data_delete' => now(),
+                        'actiu' => 'NO'
+                    ]);
+
+                // Generar factura negativa
+                $base = -$reserva->import;
+                $iva = 21;
+                $iva_import = round($base * ($iva / 100), 2);
+                $total = $base + $iva_import;
+
+                $facturaId = DB::table('_t_factures')->insertGetId([
+                    'id_reserva' => $id,
+                    'data_factura' => now(),
+                    'base' => $base,
+                    'iva' => $iva,
+                    'iva_import' => $iva_import,
+                    'total_factura' => $total,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                    'enviada' => 0
                 ]);
 
-            return response()->json([
-                'success' => $ok ? true : false,
-                'id' => $id
-            ]);        
+                // Enviar email con la factura
+                $facturaController = new FacturaController();
+                $facturaController->enviarEmail($facturaId);
+
+                return response()->json([
+                    'success' => true,
+                    'reserva' => $id,
+                    'factura' => $facturaId
+                ]);
+            });        
+
     }
     
     // Buscar confilte

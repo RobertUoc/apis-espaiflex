@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('id_reserves');
             $table->unsignedBigInteger('id_user')->nullable();
+            $table->string('nom', 150);
             $table->text('comentari')->nullable();
             $table->integer('puntuacio')->nullable();
             $table->timestamps();
