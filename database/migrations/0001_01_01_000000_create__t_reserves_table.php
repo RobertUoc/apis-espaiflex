@@ -17,8 +17,6 @@ return new class extends Migration
                 $table->unsignedBigInteger('sala');
                 $table->date('dia_inici')->nullable();
                 $table->date('dia_fi')->nullable();
-                $table->time('hora_inici')->nullable();
-                $table->time('hora_fi')->nullable();
                 $table->string('frequencia',10);
                 $table->integer('dilluns')->default(0);
                 $table->integer('dimarts')->default(0);
@@ -40,7 +38,7 @@ return new class extends Migration
                 $table->timestamps();
 
                 /* INDICES */
-                $table->index(['sala','dia_inici','dia_fi','hora_inici','hora_fi'], 'idx_reserva_sala_dia');
+                $table->index(['sala','dia_inici','dia_fi'], 'idx_reserva_sala_dia');
                 $table->index('id_user', 'idx_reserva_user');
                 
             });       
@@ -65,12 +63,12 @@ return new class extends Migration
 
             INSERT INTO _t_reserves_audit
             (
-            id_reserva, sala, dia_inici, dia_fi, hora_inici, hora_fi, frequencia, dilluns, dimarts, dimecres, dijous, divendres, dissabte, diumenge,
+            id_reserva, sala, dia_inici, dia_fi, frequencia, dilluns, dimarts, dimecres, dijous, divendres, dissabte, diumenge,
             dia_mes, tipo, el_semana, el_dia, import, actiu, id_user, data_creacio, data_update, data_delete, tipo_audit, data_creacio_audit
             )
             VALUES
             (
-            NEW.id, NEW.sala, NEW.dia_inici, NEW.dia_fi, NEW.hora_inici, NEW.hora_fi, NEW.frequencia, NEW.dilluns,
+            NEW.id, NEW.sala, NEW.dia_inici, NEW.dia_fi, NEW.frequencia, NEW.dilluns,
             NEW.dimarts, NEW.dimecres, NEW.dijous, NEW.divendres, NEW.dissabte, NEW.diumenge, NEW.dia_mes, NEW.tipo,
             NEW.el_semana, NEW.el_dia, NEW.import, NEW.actiu, NEW.id_user, NEW.data_creacio, NEW.data_update, NEW.data_delete, "INSERT", NOW()
             );
@@ -87,26 +85,26 @@ return new class extends Migration
                 SET NEW.data_update = NOW();
 
                 INSERT INTO _t_reserves_audit
-                (id_reserva, sala, dia_inici, dia_fi, hora_inici, hora_fi, frequencia,
+                (id_reserva, sala, dia_inici, dia_fi, frequencia,
                 dilluns, dimarts, dimecres, dijous, divendres, dissabte, diumenge,
                 dia_mes, tipo, el_semana, el_dia, import, actiu, id_user,
                 data_creacio, data_update, data_delete, tipo_audit, data_creacio_audit)
 
                 VALUES
-                (OLD.id, OLD.sala, OLD.dia_inici, OLD.dia_fi, OLD.hora_inici, OLD.hora_fi,
+                (OLD.id, OLD.sala, OLD.dia_inici, OLD.dia_fi,
                 OLD.frequencia, OLD.dilluns, OLD.dimarts, OLD.dimecres, OLD.dijous,
                 OLD.divendres, OLD.dissabte, OLD.diumenge, OLD.dia_mes, OLD.tipo,
                 OLD.el_semana, OLD.el_dia, OLD.import, OLD.actiu, OLD.id_user,
                 OLD.data_creacio, OLD.data_update, OLD.data_delete, "UPDATE OLD", NOW());
 
                 INSERT INTO _t_reserves_audit
-                (id_reserva, sala, dia_inici, dia_fi, hora_inici, hora_fi, frequencia,
+                (id_reserva, sala, dia_inici, dia_fi, frequencia,
                 dilluns, dimarts, dimecres, dijous, divendres, dissabte, diumenge,
                 dia_mes, tipo, el_semana, el_dia, import, actiu, id_user,
                 data_creacio, data_update, data_delete, tipo_audit, data_creacio_audit)
 
                 VALUES
-                (NEW.id, NEW.sala, NEW.dia_inici, NEW.dia_fi, NEW.hora_inici, NEW.hora_fi,
+                (NEW.id, NEW.sala, NEW.dia_inici, NEW.dia_fi,
                 NEW.frequencia, NEW.dilluns, NEW.dimarts, NEW.dimecres, NEW.dijous,
                 NEW.divendres, NEW.dissabte, NEW.diumenge, NEW.dia_mes, NEW.tipo,
                 NEW.el_semana, NEW.el_dia, NEW.import, NEW.actiu, NEW.id_user,
@@ -128,13 +126,13 @@ return new class extends Migration
                 WHERE id_reserves = OLD.id AND id > 0;
 
                 INSERT INTO _t_reserves_audit
-                (id_reserva, sala, dia_inici, dia_fi, hora_inici, hora_fi, frequencia,
+                (id_reserva, sala, dia_inici, dia_fi, frequencia,
                 dilluns, dimarts, dimecres, dijous, divendres, dissabte, diumenge,
                 dia_mes, tipo, el_semana, el_dia, import, actiu, id_user,
                 data_creacio, data_update, data_delete, tipo_audit, data_creacio_audit)
 
                 VALUES
-                (OLD.id, OLD.sala, OLD.dia_inici, OLD.dia_fi, OLD.hora_inici, OLD.hora_fi,
+                (OLD.id, OLD.sala, OLD.dia_inici, OLD.dia_fi,
                 OLD.frequencia, OLD.dilluns, OLD.dimarts, OLD.dimecres, OLD.dijous,
                 OLD.divendres, OLD.dissabte, OLD.diumenge, OLD.dia_mes, OLD.tipo,
                 OLD.el_semana, OLD.el_dia, OLD.import, OLD.actiu, OLD.id_user,

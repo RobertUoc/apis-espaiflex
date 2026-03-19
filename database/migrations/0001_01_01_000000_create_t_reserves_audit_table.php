@@ -17,8 +17,6 @@ return new class extends Migration
             $table->unsignedBigInteger('sala')->nullable();
             $table->date('dia_inici')->nullable();
             $table->date('dia_fi')->nullable();
-            $table->time('hora_inici')->nullable();
-            $table->time('hora_fi')->nullable();
             $table->string('frequencia',10);
             $table->integer('dilluns')->nullable();
             $table->integer('dimarts')->nullable();

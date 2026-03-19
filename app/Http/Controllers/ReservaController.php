@@ -44,22 +44,27 @@ class ReservaController extends Controller
     // Veure disponibilitat
     public function lecturaDia($dia, $edifici)
     {
-        $sub = DB::table('_t_reserves as res')
-            ->select('hora_inici','hora_fi','sala')
-            ->whereNull('res.data_delete')
-            ->where('res.dia_inici','<=',$dia)
-            ->where('res.dia_fi','>=',$dia)
-            ->groupBy('sala','hora_inici','hora_fi');
+        $sub = DB::table('_t_reserves_dies as dia')
+            ->leftJoin('_t_reserves as res', 'dia.id_reserva', '=', 'res.id')
+            ->select(
+                'dia.hora_inici',
+                'dia.hora_fi',
+                'res.sala'
+            )
+            ->whereNull('dia.data_delete')
+            ->where('dia.dia_inici', '<=', $dia)
+            ->where('dia.dia_fi', '>=', $dia)
+            ->groupBy('res.sala', 'dia.hora_inici', 'dia.hora_fi');
 
         $result = DB::table('_t_hores as h')
             ->join('_t_sales as sal', function ($join) use ($edifici) {
-                $join->on('sal.horari','=','h.tipus')
-                    ->where('sal.id_edifici','=',$edifici)
-                    ->where('sal.actiu','=','SI');
+                $join->on('sal.horari', '=', 'h.tipus')
+                    ->where('sal.id_edifici', '=', $edifici)
+                    ->where('sal.actiu', '=', 'SI');
             })
             ->leftJoinSub($sub, 'r', function ($join) {
-                $join->on('h.hora','=','r.hora_inici')
-                    ->on('r.sala','=','sal.id');
+                $join->on('h.hora', '=', 'r.hora_inici')
+                    ->on('r.sala', '=', 'sal.id');
             })
             ->select(
                 'sal.id',
@@ -68,33 +73,37 @@ class ReservaController extends Controller
                 DB::raw("COALESCE(r.hora_fi,'No informado') as estado"),
                 'h.tipus'
             )
-            ->where('h.activa','SI')
+            ->where('h.activa', 'SI')
             ->orderBy('sal.descripcio')
             ->orderBy('h.hora')
             ->get();
-
-        return response()->json($result);        
+        return response()->json($result);
     }
 
     //
     //
     public function lecturaEvent($dia,$sala) 
     {
-        $sub = DB::table('_t_reserves as res')
-            ->select('hora_inici','hora_fi','sala')
-            ->whereNull('res.data_delete')
-            ->where('res.dia_inici', $dia)
-            ->groupBy('sala','hora_inici','hora_fi');
+        $sub = DB::table('_t_reserves_dies as dia')
+            ->leftJoin('_t_reserves as res', 'dia.id_reserva', '=', 'res.id')
+            ->select(
+                'dia.hora_inici',
+                'dia.hora_fi',
+                'res.sala'
+            )
+            ->whereNull('dia.data_delete')
+            ->where('dia.dia_inici', $dia)
+            ->groupBy('res.sala', 'dia.hora_inici', 'dia.hora_fi');
 
         $result = DB::table('_t_hores as h')
             ->join('_t_sales as sal', function ($join) use ($sala) {
-                $join->on('h.tipus','=','sal.horari')
-                    ->where('sal.id','=',$sala)
-                    ->where('sal.actiu','=','SI');
+                $join->on('h.tipus', '=', 'sal.horari')
+                    ->where('sal.id', '=', $sala)
+                    ->where('sal.actiu', '=', 'SI');
             })
             ->leftJoinSub($sub, 'r', function ($join) {
-                $join->on('h.hora','=','r.hora_inici')
-                    ->on('r.sala','=','sal.id');
+                $join->on('h.hora', '=', 'r.hora_inici')
+                    ->on('r.sala', '=', 'sal.id');
             })
             ->select(
                 'sal.id',
@@ -103,34 +112,37 @@ class ReservaController extends Controller
                 DB::raw("COALESCE(r.hora_fi,'No informado') as estado"),
                 'h.tipus'
             )
-            ->where('h.activa','SI')
+            ->where('h.activa', 'SI')
             ->orderBy('sal.descripcio')
             ->orderBy('h.hora')
             ->get();
-
         return response()->json($result);
     }
 
     //
     //
     public function miraReserva($dia,$sala,$reserva) 
-    {
-        $sub = DB::table('_t_reserves as res')
-            ->select('hora_inici','hora_fi','sala')
-            ->whereNull('res.data_delete')
-            ->where('res.dia_inici', $dia)
+    {        
+        $sub = DB::table('_t_reserves_dies as dia')
+            ->leftJoin('_t_reserves as res', 'dia.id_reserva', '=', 'res.id')
+            ->select(
+                'dia.hora_inici',
+                'dia.hora_fi',
+                'res.sala'
+            )
+            ->whereNull('dia.data_delete')
+            ->where('dia.dia_inici', $dia)
             ->where('res.id', $reserva)
-            ->groupBy('sala','hora_inici','hora_fi');
-
+            ->groupBy('res.sala', 'dia.hora_inici', 'dia.hora_fi');
         $result = DB::table('_t_hores as h')
             ->join('_t_sales as sal', function ($join) use ($sala) {
-                $join->on('h.tipus','=','sal.horari')
-                    ->where('sal.id','=',$sala)
-                    ->where('sal.actiu','=','SI');
+                $join->on('h.tipus', '=', 'sal.horari')
+                    ->where('sal.id', '=', $sala)
+                    ->where('sal.actiu', '=', 'SI');
             })
             ->leftJoinSub($sub, 'r', function ($join) {
-                $join->on('h.hora','=','r.hora_inici')
-                    ->on('r.sala','=','sal.id');
+                $join->on('h.hora', '=', 'r.hora_inici')
+                    ->on('r.sala', '=', 'sal.id');
             })
             ->select(
                 'sal.id',
@@ -139,12 +151,11 @@ class ReservaController extends Controller
                 DB::raw("COALESCE(r.hora_fi,'No informado') as estado"),
                 'h.tipus'
             )
-            ->where('h.activa','SI')
+            ->where('h.activa', 'SI')
             ->orderBy('sal.descripcio')
             ->orderBy('h.hora')
             ->get();
-
-        return response()->json($result);        
+        return response()->json($result);
     }
 
     // Click en un event
@@ -159,8 +170,6 @@ class ReservaController extends Controller
                     'res.id',
                     'res.dia_inici',
                     'res.dia_fi',
-                    'res.hora_inici',
-                    'res.hora_fi',
                     'res.import as preu_sala',
                     'res.id_user',
 
@@ -261,47 +270,46 @@ class ReservaController extends Controller
     // Buscar confilte
     public function buscarConflicte($sala,$diainici,$diafi,$horainici,$horafi) 
     {
-        $query = DB::table('_t_reserves as res')
-            ->leftJoin('_t_sales as sal','sal.id','=','res.sala')
+        $query = DB::table('_t_reserves_dies as dia')
+            ->leftJoin('_t_reserves as res','res.id','=','dia.id_reserva')
             ->select(
-                'res.dia_inici',
-                'res.dia_fi',
-                'res.sala',
-                'res.hora_inici',
-                'res.hora_fi'
+                'dia.dia_inici',
+                'dia.dia_fi',                
+                'dia.hora_inici',
+                'dia.hora_fi'
             )
             ->where('res.sala',$sala)
-            ->whereNull('res.data_delete')
+            ->whereNull('dia.data_delete')
             ->where(function($q) use ($horainici,$horafi){
                 $q->where(function($q2) use ($horainici,$horafi){
-                        $q2->where('res.hora_inici','>',$horainici)
-                        ->where('res.hora_inici','<',$horafi);
+                        $q2->where('dia.hora_inici','>',$horainici)
+                        ->where('dia.hora_inici','<',$horafi);
                     })
                 ->orWhere(function($q2) use ($horainici,$horafi){
-                        $q2->where('res.hora_fi','>',$horainici)
-                        ->where('res.hora_fi','<',$horafi);
+                        $q2->where('dia.hora_fi','>',$horainici)
+                        ->where('dia.hora_fi','<',$horafi);
                     })
-                ->orWhere('res.hora_inici',$horainici)
-                ->orWhere('res.hora_fi',$horafi);
+                ->orWhere('dia.hora_inici',$horainici)
+                ->orWhere('dia.hora_fi',$horafi);
             });
         //
         // Si es mateix dia
         //
         if($diainici == $diafi){
             $query->where(function($q) use ($diainici,$diafi){
-                $q->where('res.dia_inici','<=',$diainici)
-                ->where('res.dia_fi','>=',$diafi);
+                $q->where('dia.dia_inici','<=',$diainici)
+                ->where('dia.dia_fi','>=',$diafi);
             });
 
         }else{
             $query->where(function($q) use ($diainici,$diafi){
                 $q->where(function($q2) use ($diainici,$diafi){
-                        $q2->where('res.dia_inici','<=',$diainici)
-                        ->where('res.dia_fi','>=',$diafi);
+                        $q2->where('dia.dia_inici','<=',$diainici)
+                        ->where('dia.dia_fi','>=',$diafi);
                     })
                 ->orWhere(function($q2) use ($diainici,$diafi){
-                        $q2->where('res.dia_fi','>=',$diainici)
-                        ->where('res.dia_fi','<=',$diafi);
+                        $q2->where('dia.dia_fi','>=',$diainici)
+                        ->where('dia.dia_fi','<=',$diafi);
                     });
             });
         }
@@ -317,54 +325,42 @@ class ReservaController extends Controller
             'sala' => 'required|integer',
             'dia_inici' => 'required|date',
             'dia_fi' => 'required|date',
-            'hora_inici' => 'required',
-            'hora_fi' => 'required',
-            'import' => 'required|numeric',
-            'id_user' => 'required|integer',
-            'frecuencia' => 'required|string',
-
-            'dom' => 'required|integer',
-            'lun' => 'required|integer',
-            'mar' => 'required|integer',
-            'mie' => 'required|integer',
-            'jue' => 'required|integer',
-            'vie' => 'required|integer',
-            'sab' => 'required|integer',
-
-            'tipo' => 'required|integer',
-            'dia_mes' => 'required|integer',
+            'frecuencia' => 'required|string',        
+            'diesSeleccionats' => 'required|string',
+            'seleccio_mensual' => 'nullable|string',        
+            'dia_seleccionado' => 'nullable|string',
             'el_semana' => 'nullable|string',
             'el_dia' => 'nullable|string',     
-            
-            'complements' => 'nullable|string',     
-            
+            'import' => 'required|numeric',
+            'id_user' => 'required|integer',
+            'horasAgrupadas' => 'required|string',     
+            'complements' => 'nullable|string',            
         ]);
         
         return DB::transaction(function () use ($validated) {
+            $dias = explode('#', $validated['diesSeleccionats']);        
+
             $lastId = DB::table('_t_reserves')->insertGetId([
                 'sala' => $validated['sala'],
                 'dia_inici' => $validated['dia_inici'],
                 'dia_fi' => $validated['dia_fi'],
-                'hora_inici' => $validated['hora_inici'],
-                'hora_fi' => $validated['hora_fi'],
                 'import' => $validated['import'],
                 'id_user' => $validated['id_user'],
-                'frequencia' => $validated['frecuencia'],
-
-                'diumenge' => $validated['dom'],
-                'dilluns' => $validated['lun'],
-                'dimarts' => $validated['mar'],
-                'dimecres' => $validated['mie'],
-                'dijous' => $validated['jue'],
-                'divendres' => $validated['vie'],
-                'dissabte' => $validated['sab'],
-
-                'tipo' => $validated['tipo'],
-                'dia_mes' => $validated['dia_mes'],
+                'frequencia' => $validated['frecuencia'],                
+                'dilluns'   => $dias[0],
+                'dimarts'   => $dias[1],
+                'dimecres'  => $dias[2],
+                'dijous'    => $dias[3],
+                'divendres' => $dias[4],
+                'dissabte'  => $dias[5],
+                'diumenge'  => $dias[6],
+                'tipo' => $validated['seleccio_mensual'],
+                'dia_mes' => $validated['dia_seleccionado'],
                 'el_semana' => $validated['el_semana'],
                 'el_dia' => $validated['el_dia'],
             ]);
 
+            // Complementos
             if (!empty($validated['complements'])) {
                 $ids = explode('#', $validated['complements']);
                 $data = [];
@@ -382,10 +378,120 @@ class ReservaController extends Controller
                 }
             }
 
-            return response()->json([
-                'success' => true,
-                'id' => $lastId
-            ]);
+            // Dias
+            $start = \Carbon\Carbon::parse($validated['dia_inici']);
+            $end   = \Carbon\Carbon::parse($validated['dia_fi'])->addDay();            
+    		// $end->modify('+1 day'); // incluir último día
+            $setmana = explode('#',$validated['diesSeleccionats']);
+            $horas = json_decode($validated['horasAgrupadas'],true);
+            $periocitat = $validated['frecuencia'];
+
+            for ($dia = $start->copy(); $dia->lt($end); $dia->addDay()) {                                      
+                $diaSemana = $dia->format('N'); // 1 = lunes, 7 = domingo
+                $dies['id_reserva'] = $lastId;
+                $dies['actiu'] = 'SI';
+                $dies['dia_inici'] = $dia->format('Y-m-d');
+                $dies['dia_fi'] = $dia->format('Y-m-d');
+                if (($periocitat == 'diahoy')||($periocitat == 'diaria')) {
+                        foreach ($horas as $h) {
+                            $dies['hora_inici'] = $h['inicio'];
+                            $dies['hora_fi'] = $h['final'];
+                            DB::table('_t_reserves_dies')->insert($dies);                            
+                        }
+                }
+                if ($periocitat == 'semanal') {
+                    $index = $diaSemana - 1; // clave: ajustar índice
+                    if (isset($setmana[$index]) && $setmana[$index] == 1) {
+                        foreach ($horas as $h) {
+                        $dies['hora_inici'] = $h['inicio'];
+                        $dies['hora_fi'] = $h['final'];
+                        DB::table('_t_reserves_dies')->insert($dies);                          
+                        }
+                    }
+                }
+                if ($periocitat == 'mensual') {					
+                    $diaSemana = $dia->format('N'); // 1 (lunes) - 7 (domingo)
+                    $diaDelMes = $dia->format('j'); // 1-31		
+                    $semanaMes = ceil($diaDelMes / 7);					
+                    // Semana ultima del mes
+                    $ultimoDiaMes = (clone $dia)->modify('last day of this month')->format('j');
+                    $ultimaSemana = ceil($ultimoDiaMes / 7);
+                    if ($validated['seleccio_mensual'] == 'Dia') {
+                        if ($diaDelMes == $validated['dia_seleccionado']) {
+                            foreach ($horas as $h) {
+                                $dies['hora_inici'] = $h['inicio'];
+                                $dies['hora_fi'] = $h['final'];
+                                DB::table('_t_reserves_dies')->insert($dies);                                      
+                            }
+                        }
+                    }
+                    if ($validated['seleccio_mensual'] == 'El') {
+                        $v_semana = $validated['el_semana'];
+                        $d_semana   = $validated['el_dia'];
+                        $mapaSemana = ['primero' => 1,'segundo' => 2,'tercero' => 3,'cuarto' => 4,'ultimo' => 5];
+                        $valor_semana = $mapaSemana[$v_semana];
+                        $mapaDias = ['lunes' => 1,'martes' => 2,'miercoles' => 3,'jueves' => 4,'viernes' => 5, 'sabado' => 6, 'domingo' => 7];
+                        $dia_dia_semana = $mapaDias[$d_semana];
+                        if (($diaSemana == $dia_dia_semana)&&(($valor_semana == $semanaMes)||($valor_semana == 5 && $semanaMes == $ultimaSemana))) {
+                            foreach ($horas as $h) {
+                                $dies['hora_inici'] = $h['inicio'];
+                                $dies['hora_fi'] = $h['final'];
+                                DB::table('_t_reserves_dies')->insert($data);                                      
+                            }							
+                        }						
+                    }
+                }
+            }
+            
+            // Creamos la factura
+            $base = $validated['import'];
+            $iva = 21;
+            $iva_import = round($base * ($iva / 100), 2);
+            $total = $base + $iva_import;
+
+                $facturaId = DB::table('_t_factures')->insertGetId([
+                    'id_reserva' => $lastId,
+                    'data_factura' => now(),
+                    'base' => $base,
+                    'iva' => $iva,
+                    'iva_import' => $iva_import,
+                    'total_factura' => $total,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                    'enviada' => 0
+                ]);
+
+                // Enviar email con la factura
+                $facturaController = new FacturaController();
+                $facturaController->enviarEmail($facturaId);
+
+            // Retornem tot lo grabat
+
+
+       $reserves = DB::table('_t_reserves_dies as dia')
+        ->leftJoin('_t_reserves as res', 'res.id', '=', 'dia.id_reserva')
+        ->leftJoin('_t_sales as sal', 'res.sala', '=', 'sal.id')
+        ->select(
+            'res.id',
+            'dia.id_reserva',
+            'dia.dia_inici',
+            'dia.dia_fi',
+            'dia.hora_inici',
+            'dia.hora_fi',
+            'sal.color',
+            'sal.descripcio',
+            'res.sala',
+            DB::raw("CONCAT(dia.dia_inici,'T',dia.hora_inici) as start"),
+            DB::raw("CONCAT(dia.dia_fi,'T',dia.hora_fi) as end")
+        )
+        ->where('dia.actiu', 'SI')
+        ->whereNull('dia.data_delete')        
+        ->where('res.id', $lastId)
+        ->orderBy('dia.dia_inici')
+        ->orderBy('dia.hora_inici')
+        ->get();
+        return response()->json($reserves);
+
         });
     }
 
