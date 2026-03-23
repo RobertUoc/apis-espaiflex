@@ -72,10 +72,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/reserves/delete_event/{id_event}', [ReservaController::class, 'deleteEvent']);           
     // Crear sheuleder para pedir reserva
     Route::get('/reserves/dia/{dia}/sala/{sala}', [ReservaController::class, 'lecturaEvent']);
-    // Buscar conflicte
-    Route::get('/reserves/buscarSala/sala/{sala}/diainici/{diainici}/diafi/{diafi}/horainici/{horainici}/horafi/{horafi}', [ReservaController::class, 'buscarConflicte']);
+    // Crear sheuleder para pedir reserva
+    Route::get('/reserves/sala/{sala}/reserva/{id_reserva}', [ReservaController::class, 'lecturaHoras']);
     // Insert Dia
     Route::post('/reserves', [ReservaController::class, 'store']);
+    // Buscar conflicte
+    Route::post('/reserves/disponibilidad', [ReservaController::class, 'comprobarDisponibilidad']);
+
 });
 
 
