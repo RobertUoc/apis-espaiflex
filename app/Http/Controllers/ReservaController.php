@@ -354,7 +354,7 @@ class ReservaController extends Controller
                 ->where('res.sala', $validated['sala'])
                 ->whereNull('dia.data_delete')
                 ->whereNull('res.data_delete')
-                ->where('dia.activa','SI')                
+                ->where('dia.actiu','SI')                
                 ->whereIn('dia.dia_inici', collect($rows)->pluck('dia_inici')->unique())
                 ->select('dia.dia_inici','dia.hora_inici','dia.hora_fi')
                 ->get();
@@ -592,7 +592,7 @@ class ReservaController extends Controller
                 ->where('res.sala', $validated['sala'])
                 ->whereNull('dia.data_delete')
                 ->whereNull('res.data_delete')
-                ->where('dia.activa','SI')
+                ->where('dia.actiu','SI')
                 ->whereIn('dia.dia_inici', $rows)
                 ->select('dia.dia_inici','dia.hora_inici','dia.hora_fi')
                 ->get();
