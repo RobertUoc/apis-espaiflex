@@ -11,6 +11,8 @@ class Factura extends Model
     protected $fillable = [
         'id_reserva',
         'data_factura',
+        'dias',
+        'precio_dia',
         'base',
         'iva',
         'iva_import',

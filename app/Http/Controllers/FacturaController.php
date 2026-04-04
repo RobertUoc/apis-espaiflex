@@ -38,22 +38,38 @@ class FacturaController extends Controller
 
     public function show($id)
     {
-        return DB::table('_t_factures as fra')
-            ->join('_t_reserves as res', 'fra.id_reserva', '=', 'res.id')
+
+        $rows = DB::table('_t_factures as fra')
+            ->leftJoin('_t_reserves as res', 'res.id', '=', 'fra.id_reserva')
             ->leftJoin('_t_sales as sal', 'res.sala', '=', 'sal.id')
             ->leftJoin('users as usr', 'res.id_user', '=', 'usr.id')
+            ->leftJoin('_t_reserves_in_complements as rco', 'rco.id_reserves', '=', 'res.id')
+            ->leftJoin('_t_complements as com', 'rco.id_complements', '=', 'com.id')
             ->select(
                 'fra.*',
                 'res.dia_inici',
                 'res.dia_fi',
-                'res.hora_inici',
-                'res.hora_fi',
                 'sal.descripcio as nom_sala',
                 'usr.name as nom_user',
-                'usr.email as email_user'
+                'usr.email as email_user',
+                'com.descripcio as nom_complement',
+                'com.preu as preu_complement'
             )
             ->where('fra.id', $id)
-            ->first();
+            ->get();
+
+        // base
+        $factura = (array) $rows[0];
+        // complementos
+        $factura['complements'] = $rows
+            ->filter(fn($r) => $r->nom_complement !== null)
+            ->map(fn($r) => [
+                'nombre' => $r->nom_complement,
+                'precio' => $r->preu_complement
+            ])
+            ->values();
+
+        return $factura;        
     }
 
     public function enviarEmail($id)
@@ -74,6 +90,17 @@ class FacturaController extends Controller
         if (!$factura) {
             return response()->json(['error' => 'Factura no encontrada'], 404);
         }
+
+        $complements = DB::table('_t_reserves_in_complements as rco')
+            ->join('_t_complements as com', 'rco.id_complements', '=', 'com.id')
+            ->where('rco.id_reserves', $factura->id_reserva)
+            ->select(
+                'com.descripcio',
+                'com.preu'
+            )
+            ->get();
+                    
+        $factura->complements = $complements;
 
         // Generar PDF
         $pdf = Pdf::loadView('pdf.factura', ['factura' => $factura]);
@@ -131,6 +158,8 @@ class FacturaController extends Controller
         $validated = $request->validate([
             'id_reserva'    => 'required|integer',            
             'data_factura'  => 'required|date',
+            'dia'           => 'required|numeric',
+            'precio_dia'    => 'required|numeric',
             'base'          => 'required|numeric',
             'iva'           => 'required|numeric',
             'iva_import'    => 'required|numeric',
@@ -140,6 +169,8 @@ class FacturaController extends Controller
         $id = DB::table('_t_factures')->insertGetId([
             'id_reserva' => $validated['id_reserva'],            
             'data_factura' => $validated['data_factura'],
+            'dia' => $validated['dia'],
+            'precio_dia' => $validated['precio_dia'],
             'base' => $validated['base'],
             'iva' => $validated['iva'],
             'iva_import' => $validated['iva_import'],

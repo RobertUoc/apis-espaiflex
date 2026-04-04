@@ -243,9 +243,19 @@ class ReservaController extends Controller
                 $iva_import = round($base * ($iva / 100), 2);
                 $total = $base + $iva_import;
 
+                // Dades de la factura
+                $factura = DB::table('_t_factures')
+                    ->where('id_reserva', $id)
+                    ->first();  
+
+                $dia = $factura->dias;
+                $precio = -$factura->precio_dia;
+
                 $facturaId = DB::table('_t_factures')->insertGetId([
                     'id_reserva' => $id,
                     'data_factura' => now(),
+                    'dias' => $dia,
+                    'precio_dia' => $precio,
                     'base' => $base,
                     'iva' => $iva,
                     'iva_import' => $iva_import,
@@ -284,7 +294,9 @@ class ReservaController extends Controller
             'import' => 'required|numeric',
             'id_user' => 'required|integer',
             'horasAgrupadas' => 'required|string',     
-            'complements' => 'nullable|string',            
+            'dias' => 'nullable|numeric',
+            'precio_dia' => 'nullable|numeric',
+            'complements' => 'nullable|string',  
         ]);
         
         return DB::transaction(function () use ($validated) {
@@ -430,6 +442,8 @@ class ReservaController extends Controller
                 $facturaId = DB::table('_t_factures')->insertGetId([
                     'id_reserva' => $lastId,
                     'data_factura' => now(),
+                    'dias' => $validated['dias'],
+                    'precio_dia' => $validated['precio_dia'],
                     'base' => $base,
                     'iva' => $iva,
                     'iva_import' => $iva_import,
@@ -538,7 +552,8 @@ class ReservaController extends Controller
                 'descripcio' => $h->descripcio,
                 'estado' => 'No informado',
                 'hora_inici' => $h->hora,
-                'tipus' => $h->horari,                
+                'tipus' => $h->horari,     
+                'contardias' => 0
             ];
         }
 
@@ -546,6 +561,7 @@ class ReservaController extends Controller
         $periocitat = $validated['frecuencia'];
         $start = \Carbon\Carbon::parse($validated['dia_inici']);
         $end   = \Carbon\Carbon::parse($validated['dia_fi'])->addDay();
+        $contarDias = 0;
 
         $rows = [];
         for ($dia = $start->copy(); $dia->lt($end); $dia->addDay()) {
@@ -555,14 +571,19 @@ class ReservaController extends Controller
             $insertar = false;
             if (in_array($periocitat, ['diahoy','diaria'])) {
                 $insertar = true;
+                $contarDias += 1;
             }
             if ($periocitat === 'semanal') {
                 $index = $diaSemana - 1;
-                $insertar = isset($setmana[$index]) && $setmana[$index] == 1;
+                if (isset($setmana[$index]) && $setmana[$index] == 1) {
+                    $insertar = true;
+                    $contarDias += 1;
+                }                
             }
             if ($periocitat === 'mensual') {
                 if ($validated['seleccio_mensual'] === '1') {
                     $insertar = ($diaDelMes == $validated['dia_seleccionado']);
+                    $contarDias += 1;
                 }
                 if ($validated['seleccio_mensual'] === '2') {
                     $mapaSemana = ['primero'=>1,'segundo'=>2,'tercero'=>3,'cuarto'=>4,'ultimo'=>5];
@@ -576,6 +597,7 @@ class ReservaController extends Controller
                         ($valorSemana == $semanaMes || ($valorSemana == 5 && $semanaMes == $ultimaSemana))
                     ) {
                         $insertar = true;
+                        $contarDias += 1;
                     }
                 }
             }
@@ -586,6 +608,11 @@ class ReservaController extends Controller
             }
         }
 
+        foreach ($resultado as &$item) {
+            $item['contardias'] = $contarDias;
+        }
+        unset($item);        
+        
         if (!empty($rows)) {
             $conflictos = DB::table('_t_reserves_dies as dia')
                 ->join('_t_reserves as res', 'res.id', '=', 'dia.id_reserva')
@@ -596,7 +623,7 @@ class ReservaController extends Controller
                 ->whereIn('dia.dia_inici', $rows)
                 ->select('dia.dia_inici','dia.hora_inici','dia.hora_fi')
                 ->get();
-
+                
             foreach ($conflictos as $c) {
                 foreach ($resultado as &$slot) {
                     if (

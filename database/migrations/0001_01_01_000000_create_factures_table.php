@@ -15,11 +15,13 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('id_reserva')->nullable();            
             $table->date('data_factura');
-            $table->decimal('base', 10, 2);
-            $table->decimal('iva', 10, 2);
-            $table->decimal('iva_import', 10, 2);
-            $table->decimal('total_factura', 10, 2);
-            $table->unsignedBigInteger('enviada');
+            $table->integer('dias')->default(0);
+            $table->decimal('precio_dia', 10, 2)->default(0);
+            $table->decimal('base', 10, 2)->default(0);
+            $table->decimal('iva', 10, 2)->default(0);
+            $table->decimal('iva_import', 10, 2)->default(0);
+            $table->decimal('total_factura', 10, 2)->default(0);
+            $table->unsignedBigInteger('enviada')->default(0);
             $table->timestamps();
 
             $table->index('id_reserva');
