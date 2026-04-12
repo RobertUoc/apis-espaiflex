@@ -62,15 +62,13 @@ Route::get('/reserves/dia/{dia}/sala/{sala}/reserva/{reserva}', [ReservaControll
 Route::post('/comentaris', [ComentariController::class, 'store']);
 // Llegir a l'entrar al calendari i veure sales tothom
 Route::get('/getsales/edifici/{edifici}', [SalaController::class, 'salasEdifici']);    
+// Llegir Sales
 Route::get('/getsales/versala/{id_sala}', [SalaController::class, 'verSala']); 
+Route::get('/getsales/vercomplements/{id_sala}', [SalaController::class, 'verComplements']); 
 
 Route::middleware('auth:sanctum')->group(function () {
     // Update User
     Route::put('/users/{id}', [UserController::class, 'update']);
-    // Llegir Sales
-    
-       
-    Route::get('/getsales/vercomplements/{id_sala}', [SalaController::class, 'verComplements']);    
     // Esborro reserva
     Route::get('/reserves/delete_event/{id_event}', [ReservaController::class, 'deleteEvent']);           
     // Crear sheuleder para pedir reserva
