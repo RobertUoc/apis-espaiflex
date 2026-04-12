@@ -65,6 +65,8 @@ Route::get('/getsales/edifici/{edifici}', [SalaController::class, 'salasEdifici'
 // Llegir Sales
 Route::get('/getsales/versala/{id_sala}', [SalaController::class, 'verSala']); 
 Route::get('/getsales/vercomplements/{id_sala}', [SalaController::class, 'verComplements']); 
+// Crear sheuleder para pedir reserva
+Route::get('/reserves/sala/{sala}/reserva/{id_reserva}', [ReservaController::class, 'lecturaHoras']);
 
 Route::middleware('auth:sanctum')->group(function () {
     // Update User
@@ -73,8 +75,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/reserves/delete_event/{id_event}', [ReservaController::class, 'deleteEvent']);           
     // Crear sheuleder para pedir reserva
     Route::get('/reserves/dia/{dia}/sala/{sala}', [ReservaController::class, 'lecturaEvent']);
-    // Crear sheuleder para pedir reserva
-    Route::get('/reserves/sala/{sala}/reserva/{id_reserva}', [ReservaController::class, 'lecturaHoras']);
     // Insert Dia
     Route::post('/reserves', [ReservaController::class, 'store']);
     // Buscar conflicte
