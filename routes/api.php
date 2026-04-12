@@ -60,12 +60,14 @@ Route::get('/reserves/dia/{dia}/sala/{sala}/reserva/{reserva}', [ReservaControll
 
 // Comentaris
 Route::post('/comentaris', [ComentariController::class, 'store']);
+// Llegir a l'entrar al calendari
+Route::get('/getsales/edifici/{edifici}', [SalaController::class, 'salasEdifici']);    
 
 Route::middleware('auth:sanctum')->group(function () {
     // Update User
     Route::put('/users/{id}', [UserController::class, 'update']);
     // Llegir Sales
-    Route::get('/getsales/edifici/{edifici}', [SalaController::class, 'salasEdifici']);    
+    
     Route::get('/getsales/versala/{id_sala}', [SalaController::class, 'verSala']);    
     Route::get('/getsales/vercomplements/{id_sala}', [SalaController::class, 'verComplements']);    
     // Esborro reserva
