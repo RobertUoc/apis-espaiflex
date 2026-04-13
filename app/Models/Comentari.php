@@ -12,6 +12,7 @@ class Comentari extends Model
         'id',
         'id_reserves',
         'id_user',
+        'nom',
         'comentari',
         'puntuacio'
     ];
