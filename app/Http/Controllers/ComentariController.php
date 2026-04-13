@@ -57,7 +57,8 @@ class ComentariController extends Controller
             'id_reserves' => 'required|integer',
             'id_user'     => 'required|integer',
             'comentari'   => 'required|string',
-            'puntuacio'   => 'required|integer|min:1|max:5'
+            'puntuacio'   => 'required|integer|min:1|max:5',
+            'nom'         => 'nullable|string',
         ]);
 
         $comentari = Comentari::create($validated);
