@@ -18,10 +18,9 @@ class ComentariController extends Controller
     {
         $query = DB::table('_t_reserves_comentaris as com')
             ->leftJoin('_t_reserves as res', 'res.id', '=', 'com.id_reserves')
-            ->leftJoin('_t_sales as sal', 'res.sala', '=', 'sal.id')
-            ->leftJoin('users as usu', 'res.id_user', '=', 'usu.id')
+            ->leftJoin('_t_sales as sal', 'res.sala', '=', 'sal.id')            
             ->select(
-                'usu.name as nom',
+                'nom',
                 'sal.descripcio',
                 'res.dia_inici',
                 'res.dia_fi',
@@ -29,7 +28,7 @@ class ComentariController extends Controller
                 'com.puntuacio',
                 'com.created_at'
             )
-            ->orderBy('usu.name')
+            ->orderBy('nom')
             ->orderBy('com.created_at');
 
         if ($request->filled('id_reserva')) {
