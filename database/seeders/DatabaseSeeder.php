@@ -22,6 +22,12 @@ class DatabaseSeeder extends Seeder
             'role' => 'admin',
             'password' => '123456'
         ]);
+        User::factory()->create([
+            'name' => 'Visitant',
+            'email' => 'visitant@admin.com',
+            'role' => 'visitant',
+            'password' => '654321'
+        ]);
         $this->call([
             ProvinciesSeeder::class,
             HoresSeeder::class

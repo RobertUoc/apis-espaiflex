@@ -25,8 +25,6 @@ class ComentariController extends Controller
                 'sal.descripcio',
                 'res.dia_inici',
                 'res.dia_fi',
-                'res.hora_inici',
-                'res.hora_fi',
                 'com.comentari',
                 'com.puntuacio',
                 'com.created_at'

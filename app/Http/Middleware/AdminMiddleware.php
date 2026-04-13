@@ -8,6 +8,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class AdminMiddleware
 {
+
     /**
      * Handle an incoming request.
      *
@@ -18,8 +19,6 @@ class AdminMiddleware
         if ($request->user()->role !== 'admin') {
             return response()->json(['error' => 'No autorizado'], 403);
         }
-
         return $next($request);
-
     }
 }

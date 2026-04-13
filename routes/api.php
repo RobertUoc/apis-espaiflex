@@ -12,7 +12,37 @@ use App\Http\Controllers\FacturaController;
 use App\Http\Controllers\ReservaController;
 use App\Http\Controllers\UserController;
 
-// Rutas protegidas 
+
+// Login Part administrativa
+Route::post('/login', [AuthController::class, 'login']);
+
+// Rutas protegidas
+Route::middleware('auth:sanctum')->group(function () {
+    // Llegir Edificis 
+    Route::get('/edificis', [EdificiController::class, 'index']);
+    // Crear Usuaris Plataforma
+    Route::post('/users', [UserController::class, 'store']); 
+    // Calendari
+    // llegir tot el calendari
+    Route::get('/reserves/any/{any}/edifici/{edifici}', [ReservaController::class, 'lecturaReserves']);
+    // Veure estats d'un dia
+    Route::get('/reserves/dia/{dia}/edifici/{edifici}', [ReservaController::class, 'lecturaDia']);
+    // Veure reserva per id
+    Route::get('/reserves/reserva/{id}', [ReservaController::class, 'lecturaReserva']);
+    // Mirar Reserva
+    Route::get('/reserves/dia/{dia}/sala/{sala}/reserva/{reserva}', [ReservaController::class, 'miraReserva']);
+    // Comentaris
+    Route::post('/comentaris', [ComentariController::class, 'store']);
+    // Llegir a l'entrar al calendari i veure sales tothom
+    Route::get('/getsales/edifici/{edifici}', [SalaController::class, 'salasEdifici']);    
+    // Llegir Sales
+    Route::get('/getsales/versala/{id_sala}', [SalaController::class, 'verSala']); 
+    Route::get('/getsales/vercomplements/{id_sala}', [SalaController::class, 'verComplements']); 
+    // Crear sheuleder para pedir reserva
+    Route::get('/reserves/sala/{sala}/reserva/{id_reserva}', [ReservaController::class, 'lecturaHoras']);
+});
+
+// Rutas protegidas Admin
 Route::middleware(['auth:sanctum', 'admin'])->group(function () {
     // Edificis
     Route::post('/edificis', [EdificiController::class, 'store']);
@@ -39,36 +69,8 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
     Route::post('factures/{id}/email', [FacturaController::class, 'enviarEmail']);    
 });
 
-// Sense Token
-// Login Part administrativa
-Route::post('/login', [AuthController::class, 'login']);
-// Llegir Edificis 
-Route::get('/edificis', [EdificiController::class, 'index']);
-// Crear Usuaris Plataforma
-Route::post('/users', [UserController::class, 'store']); 
-// Calendari
-// llegir tot el calendari
-Route::get('/reserves/any/{any}/edifici/{edifici}', [ReservaController::class, 'lecturaReserves']);
-// Veure estats d'un dia
-Route::get('/reserves/dia/{dia}/edifici/{edifici}', [ReservaController::class, 'lecturaDia']);
-
-// Veure reserva per id
-Route::get('/reserves/reserva/{id}', [ReservaController::class, 'lecturaReserva']);
-
-// Mirar Reserva
-Route::get('/reserves/dia/{dia}/sala/{sala}/reserva/{reserva}', [ReservaController::class, 'miraReserva']);
-
-// Comentaris
-Route::post('/comentaris', [ComentariController::class, 'store']);
-// Llegir a l'entrar al calendari i veure sales tothom
-Route::get('/getsales/edifici/{edifici}', [SalaController::class, 'salasEdifici']);    
-// Llegir Sales
-Route::get('/getsales/versala/{id_sala}', [SalaController::class, 'verSala']); 
-Route::get('/getsales/vercomplements/{id_sala}', [SalaController::class, 'verComplements']); 
-// Crear sheuleder para pedir reserva
-Route::get('/reserves/sala/{sala}/reserva/{id_reserva}', [ReservaController::class, 'lecturaHoras']);
-
-Route::middleware('auth:sanctum')->group(function () {
+// Rutas protegidas User i Admin
+Route::middleware(['auth:sanctum', 'role:user,admin'])->group(function () {
     // Update User
     Route::put('/users/{id}', [UserController::class, 'update']);
     // Esborro reserva
@@ -79,7 +81,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/reserves', [ReservaController::class, 'store']);
     // Buscar conflicte
     Route::post('/reserves/disponibilidad', [ReservaController::class, 'comprobarDisponibilidad']);
-
 });
 
 
