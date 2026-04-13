@@ -56,9 +56,10 @@ class ComentariController extends Controller
         $validated = $request->validate([
             'id_reserves' => 'required|integer',
             'id_user'     => 'required|integer',
+            'nom'         => 'nullable|string',
             'comentari'   => 'required|string',
             'puntuacio'   => 'required|integer|min:1|max:5',
-            'nom'         => 'nullable|string',
+            
         ]);
 
         $comentari = Comentari::create($validated);
