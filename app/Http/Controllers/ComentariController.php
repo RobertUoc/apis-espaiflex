@@ -20,7 +20,7 @@ class ComentariController extends Controller
             ->leftJoin('_t_reserves as res', 'res.id', '=', 'com.id_reserves')
             ->leftJoin('_t_sales as sal', 'res.sala', '=', 'sal.id')            
             ->select(
-                'nom',
+                'com.nom',
                 'sal.descripcio',
                 'res.dia_inici',
                 'res.dia_fi',
