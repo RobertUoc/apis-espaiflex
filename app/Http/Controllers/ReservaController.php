@@ -373,10 +373,16 @@ class ReservaController extends Controller
 
             foreach ($rows as $r) {
                 foreach ($conflictos as $c) {
+
+                    $cInicio = \Carbon\Carbon::createFromFormat('H:i:s', $c->hora_inici);
+                    $cFin    = \Carbon\Carbon::createFromFormat('H:i:s', $c->hora_fi);
+                    $rInicio = \Carbon\Carbon::createFromFormat('H:i', $r['hora_inici']);
+                    $rFin    = \Carbon\Carbon::createFromFormat('H:i', $r['hora_fi']);
+
                     if (
                         $c->dia_inici == $r['dia_inici'] &&
-                        $c->hora_inici < $r['hora_fi'] &&
-                        $c->hora_fi > $r['hora_inici']
+                         $cInicio->lt($rFin) &&
+                        $cFin->gt($rInicio)
                     ) {
                         return response()->json([
                             'error' => 'Conflicto de reserva',
