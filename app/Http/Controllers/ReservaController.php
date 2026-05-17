@@ -467,7 +467,7 @@ class ReservaController extends Controller
                 ->leftJoin('_t_reserves as res', 'res.id', '=', 'dia.id_reserva')
                 ->leftJoin('_t_sales as sal', 'res.sala', '=', 'sal.id')
                 ->select(
-                    'res.id',
+                    'dia.id',
                     'dia.id_reserva',
                     'dia.dia_inici',
                     'dia.dia_fi',
